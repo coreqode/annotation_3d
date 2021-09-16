@@ -173,6 +173,7 @@ def get_param_from_pkl(filepath, jb = True):
     betas = data['betas']
     joints_3d = data['joints3d']
     camera_param = data['orig_cam']
+    frame_ids = data['frame_ids']
     pelvis = joints_3d[:, 0, :]
 
     pred_cam = data['pred_cam']
@@ -184,7 +185,7 @@ def get_param_from_pkl(filepath, jb = True):
     trans = np.zeros((pose.shape[0], 3))
     trans[:, 0] = camera_param[:, 2]
     trans[:, 1] = camera_param[:,  3]
-    return pose, betas, trans, bboxes, scales
+    return pose, betas, trans, bboxes, scales, frame_ids
 
 
 def get_bbox(obj):
@@ -203,7 +204,7 @@ if __name__ == '__main__':
     add_plane(size =1, scale = (factor, factor/ar, 1))
     add_video_to_plane(ref_video_filepath, num_frame)
 
-    poses, betas, transs, bboxes, scales = get_param_from_pkl(tcmr_pkl_filepath)
+    poses, betas, transs, bboxes, scales, frame_ids = get_param_from_pkl(tcmr_pkl_filepath)
     bpy.context.scene.tool_settings.use_keyframe_insert_auto = True
     obj = bpy.data.objects[f'SMPLX-{gender}']
     arm = obj.data
@@ -212,12 +213,12 @@ if __name__ == '__main__':
     bpy.ops.object.mode_set(mode='POSE')
     obj.select_set(True)
 
-    plane_bbox = get_bbox(bpy.data.objects['Plane'])
-    mesh_bbox = get_bbox(obj)
-    uq = np.unique(mesh_bbox[..., -1])
-    mesh_height = np.abs(uq[0]  - uq[1])
-    uq = np.unique(plane_bbox[..., -1])
-    plane_height = np.abs(uq[0]  - uq[1])
+    # plane_bbox = get_bbox(bpy.data.objects['Plane'])
+    # mesh_bbox = get_bbox(obj)
+    # uq = np.unique(mesh_bbox[..., -1])
+    # mesh_height = np.abs(uq[0]  - uq[1])
+    # uq = np.unique(plane_bbox[..., -1])
+    # plane_height = np.abs(uq[0]  - uq[1])
 
 
     ### Del later
@@ -235,21 +236,24 @@ if __name__ == '__main__':
     # all_bbox_height.sort(reverse = True)
     # bbox_height = np.mean(all_bbox_height[:5])
 
-    for n in range(poses.shape[0]):
-        if n == 0:
+    for n in frame_ids:
+        idx = list(frame_ids).index(n)
+
+        if idx == 0:
             obj.keyframe_insert("rotation_quaternion", group="Rotation")
             obj.keyframe_insert("location", group="Location")
-        pose = poses[n]
-        beta = betas[n]
-        trans = transs[n]
-        scale = scales[n]
+
+        bpy.context.scene.frame_current = n
+        pose = poses[idx]
+        beta = betas[idx]
+        trans = transs[idx]
+        scale = scales[idx]
         # propr = bbox_height / height
         # rw_height = propr * plane_height
 
         # pro = rw_height / mesh_height
 
         apply_pose_and_beta(obj, pose, trans, beta)
-        bpy.context.scene.frame_current = n
         bones = bpy.data.objects[f'SMPLX-{gender}'].pose.bones
         # bpy.data.objects['Plane'].scale = (scale[0], scale[1], 1)
 

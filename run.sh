@@ -1,6 +1,6 @@
 #! /bin/sh
-SEQ_NAME='abhi'
-GENDER='male'
+SEQ_NAME='abhi3'
+GENDER='female'
 BLEND_PATH="./data/to_annotate/${SEQ_NAME}/annotate/${SEQ_NAME}.blend"
 
 python prepare_for_annotation.py --seq_name $SEQ_NAME --gender $GENDER
