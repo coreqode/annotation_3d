@@ -7,6 +7,8 @@ __pycache__/
 *.so
 
 data/blend_files/starter.blend
+data/to_annotate/*
+data/.DS_Store
 # Distribution / packaging
 .Python
 build/

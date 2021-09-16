@@ -121,7 +121,6 @@ def deselect_all():
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = None
 
-
 def select_object(obj):
     bpy.context.view_layer.objects.active = obj
 
@@ -153,7 +152,6 @@ def toggle_viewport(gender):
     bpy.data.objects[f'SMPLX-{gender}'].hide_set(False)
     bpy.data.objects[f'SMPLX-mesh-{gender}'].hide_set(False)
 
-
 def read_pkl(filepath):
     with open(filepath, 'rb') as fi:
         d = pickle.load(fi)
@@ -176,10 +174,23 @@ def get_param_from_pkl(filepath, jb = True):
     camera_param = data['orig_cam']
     pelvis = joints_3d[:, 0, :]
 
+    pred_cam = data['pred_cam']
+    scales = np.zeros((pose.shape[0], 3))
+    scales[:, 0] = pred_cam[:, 0]
+    scales[:, 1] = pred_cam[:, 0]
+    scales[:, 2] = pred_cam[:, 0]
+
     trans = np.zeros((pose.shape[0], 3))
     trans[:, 0] = camera_param[:, 2]
     trans[:, 1] = camera_param[:,  3]
-    return pose, betas, trans, bboxes
+    return pose, betas, trans, bboxes, scales
+
+
+def get_bbox(obj):
+    bboxes  = np.zeros((8, 3))
+    for i, bb in enumerate(obj.bound_box):
+        bboxes[i] = obj.matrix_world @ Vector([bb[0],  bb[1], bb[2]])
+    return bboxes
 
 if __name__ == '__main__':
     height, width, num_frame, tcmr_pkl_filepath, ref_video_filepath, gender= read_pkl('./temp.pkl')
@@ -190,32 +201,79 @@ if __name__ == '__main__':
     add_plane(size =1, scale = (factor, factor/ar, 1))
     add_video_to_plane(ref_video_filepath)
 
-    poses, betas, transs, bboxes= get_param_from_pkl(tcmr_pkl_filepath)
+    poses, betas, transs, bboxes, scales = get_param_from_pkl(tcmr_pkl_filepath)
     bpy.context.scene.tool_settings.use_keyframe_insert_auto = True
-    obj = bpy.data.objects['SMPLX-male']
+    obj = bpy.data.objects[f'SMPLX-{gender}']
     arm = obj.data
     deselect_all()
     select_object(obj)
     bpy.ops.object.mode_set(mode='POSE')
     obj.select_set(True)
 
-    for n in range(num_frame):
+    plane_bbox = get_bbox(bpy.data.objects['Plane'])
+    mesh_bbox = get_bbox(obj)
+    uq = np.unique(mesh_bbox[..., -1])
+    mesh_height = np.abs(uq[0]  - uq[1])
+    uq = np.unique(plane_bbox[..., -1])
+    plane_height = np.abs(uq[0]  - uq[1])
+
+
+    ### Del later
+    import pickle
+    with open('./abhi2.pkl', 'rb') as fi:
+        bboxes = pickle.load(fi)
+
+    all_bbox_height = []
+    for n in range(poses.shape[0]):
+        bbox = bboxes[n]
+        if len(bbox) > 0:
+            xmin, ymin, xmax, ymax, _ = bbox[0]
+        bbox_width = xmax - xmin
+        all_bbox_height.append(ymax - ymin)
+    all_bbox_height.sort(reverse = True)
+    bbox_height = np.mean(all_bbox_height[:5])
+
+    for n in range(poses.shape[0]):
         if n == 0:
             obj.keyframe_insert("rotation_quaternion", group="Rotation")
             obj.keyframe_insert("location", group="Location")
         pose = poses[n]
         beta = betas[n]
         trans = transs[n]
-        bbox = bboxes[n]
+        scale = scales[n]
+        propr = bbox_height / height
+        rw_height = propr * plane_height
+
+        pro = rw_height / mesh_height
 
         apply_pose_and_beta(obj, pose, trans, beta)
         bpy.context.scene.frame_current = n
-        bones = bpy.data.objects['SMPLX-male'].pose.bones
+        bones = bpy.data.objects[f'SMPLX-{gender}'].pose.bones
+        # bpy.data.objects['Plane'].scale = (scale[0], scale[1], 1)
 
         for bone in bones:
             if bone.name == 'root':
                 bone.location = (trans[0], -trans[2], trans[1])
+                # bone.scale = (scale[0], scale[1], scale[2])
+                bone.scale = (pro, pro, pro)
                 bone.keyframe_insert(data_path = 'location', frame = n)
             bone.keyframe_insert(data_path = 'rotation_quaternion', frame = n)
 
     bpy.context.scene.tool_settings.use_keyframe_insert_auto = False
+
+
+
+
+
+
+
+
+
+# TODO
+ # -  run.sh arparase
+ # -  animation time (end)
+ # - scale
+ # - bbox, fit
+ # - body texture rainbow
+ # - Take the bbox height and sort it in the order
+ # Take the bounding box and it's center and then place the root there.

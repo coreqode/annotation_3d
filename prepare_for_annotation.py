@@ -16,7 +16,7 @@ def get_parser():
 
 def get_info(abs_path, seq_name, gender):
 
-    ref_video_filepath = os.path.join(abs_path, 'data/to_annotate', seq_name, 'ref_video.mp4')
+    ref_video_filepath = os.path.join(abs_path, 'data/to_annotate', seq_name, f'{seq_name}.mp4')
     tcmr_pkl_filepath = os.path.join(abs_path, 'data/to_annotate', seq_name, 'tcmr_output.pkl')
     blend_file_path = os.path.join(abs_path, 'data/to_annotate', seq_name, f'annotate/{seq_name}.blend')
 
