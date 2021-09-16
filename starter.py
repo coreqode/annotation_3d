@@ -124,7 +124,7 @@ def deselect_all():
 def select_object(obj):
     bpy.context.view_layer.objects.active = obj
 
-def add_video_to_plane(filepath):
+def add_video_to_plane(filepath, num_frames):
     all_mat = bpy.data.materials
     mat = all_mat.get('Material')
     if mat is None:
@@ -147,6 +147,7 @@ def add_video_to_plane(filepath):
     nt.links.new(image_texture.outputs['Color'], emission.inputs['Color'])
 
     image_texture.image = bpy.data.images.load(filepath)
+    image_texture.image_user.frame_duration = num_frames
 
 def toggle_viewport(gender):
     bpy.data.objects[f'SMPLX-{gender}'].hide_set(False)
@@ -195,11 +196,12 @@ def get_bbox(obj):
 if __name__ == '__main__':
     height, width, num_frame, tcmr_pkl_filepath, ref_video_filepath, gender= read_pkl('./temp.pkl')
     toggle_viewport(gender)
+    bpy.data.scenes['Scene'].frame_end = num_frame
 
     ar = width/height
     factor = 6
     add_plane(size =1, scale = (factor, factor/ar, 1))
-    add_video_to_plane(ref_video_filepath)
+    add_video_to_plane(ref_video_filepath, num_frame)
 
     poses, betas, transs, bboxes, scales = get_param_from_pkl(tcmr_pkl_filepath)
     bpy.context.scene.tool_settings.use_keyframe_insert_auto = True
@@ -219,19 +221,19 @@ if __name__ == '__main__':
 
 
     ### Del later
-    import pickle
-    with open('./abhi2.pkl', 'rb') as fi:
-        bboxes = pickle.load(fi)
+    # import pickle
+    # with open('./abhi2.pkl', 'rb') as fi:
+    #     bboxes = pickle.load(fi)
 
-    all_bbox_height = []
-    for n in range(poses.shape[0]):
-        bbox = bboxes[n]
-        if len(bbox) > 0:
-            xmin, ymin, xmax, ymax, _ = bbox[0]
-        bbox_width = xmax - xmin
-        all_bbox_height.append(ymax - ymin)
-    all_bbox_height.sort(reverse = True)
-    bbox_height = np.mean(all_bbox_height[:5])
+    # all_bbox_height = []
+    # for n in range(poses.shape[0]):
+    #     bbox = bboxes[n]
+    #     if len(bbox) > 0:
+    #         xmin, ymin, xmax, ymax, _ = bbox[0]
+    #     bbox_width = xmax - xmin
+    #     all_bbox_height.append(ymax - ymin)
+    # all_bbox_height.sort(reverse = True)
+    # bbox_height = np.mean(all_bbox_height[:5])
 
     for n in range(poses.shape[0]):
         if n == 0:
@@ -241,10 +243,10 @@ if __name__ == '__main__':
         beta = betas[n]
         trans = transs[n]
         scale = scales[n]
-        propr = bbox_height / height
-        rw_height = propr * plane_height
+        # propr = bbox_height / height
+        # rw_height = propr * plane_height
 
-        pro = rw_height / mesh_height
+        # pro = rw_height / mesh_height
 
         apply_pose_and_beta(obj, pose, trans, beta)
         bpy.context.scene.frame_current = n
@@ -255,7 +257,7 @@ if __name__ == '__main__':
             if bone.name == 'root':
                 bone.location = (trans[0], -trans[2], trans[1])
                 # bone.scale = (scale[0], scale[1], scale[2])
-                bone.scale = (pro, pro, pro)
+                # bone.scale = (pro, pro, pro)
                 bone.keyframe_insert(data_path = 'location', frame = n)
             bone.keyframe_insert(data_path = 'rotation_quaternion', frame = n)
 
