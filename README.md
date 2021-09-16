@@ -12,7 +12,7 @@ cd annotation_3d
 ```
 
 
-- Install the starter.blend file from this [link](https://iiitaphyd-my.sharepoint.com/:u:/g/personal/chandradeep_pokhariya_research_iiit_ac_in/EcPIPlqYX49AnTsULcDiioQBxiVLOAC05yaCrWdgFBOTyw?e=StDTff)
+- Place `starter.blend` file from this [link](https://iiitaphyd-my.sharepoint.com/:u:/g/personal/chandradeep_pokhariya_research_iiit_ac_in/EcPIPlqYX49AnTsULcDiioQBxiVLOAC05yaCrWdgFBOTyw?e=StDTff) to `data/blend_files`. (~127mb)
 - Place the frame sequence (video) in the `data/to_annotate` folder similar to abhi.
 - Define the seq_name and gender in the `run.sh`
 
