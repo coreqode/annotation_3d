@@ -2,8 +2,15 @@
 SEQ_NAME=$1
 GENDER=$2
 BLEND_PATH="./data/to_annotate/${SEQ_NAME}/annotate/${SEQ_NAME}.blend"
+BLEND_pkl="./data/to_annotate/${SEQ_NAME}/annotate/smplx_param.pkl"
+BLENDER_PATH="~/Desktop/blender/blender"
 
-python prepare_for_annotation.py --seq_name $SEQ_NAME --gender $GENDER
-/Applications/blender.app/Contents/MacOS/blender $BLEND_PATH -P starter.py
+if test -f "$BLEND_pkl"; then
+        echo "Continuing from last saved"
+        BLEND_PATH="./data/to_annotate/${SEQ_NAME}/annotate/${SEQ_NAME}.blend"
+        #linux
+        $BLENDER_PATH $BLEND_PATH
 
-# /Applications/Blender.app/Contents/Resources/2.93/python/bin/python3.9 -m pip install joblib
+else
+        python prepare_for_annotation.py --seq_name $SEQ_NAME --gender $GENDER
+        $BLENDER_PATH $BLEND_PATH -P starter.py
