@@ -9,6 +9,7 @@ __pycache__/
 data/blend_files/starter.blend
 data/to_annotate/*
 data/.DS_Store
+masks/*
 # Distribution / packaging
 .Python
 build/
