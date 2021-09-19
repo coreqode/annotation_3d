@@ -6,7 +6,7 @@ import pickle
 import sys
 import numpy as np
 import joblib
-import cv2
+# import cv2
 from mathutils import Vector, Quaternion
 sys.path.append('.')
 from variables import *
@@ -259,20 +259,20 @@ def local_to_global(arm_obj, bone, local_rotation):
    global_rotation = arm_obj.matrix_world @ bone.matrix @ Vector(local_rotation)
    return global_rotation
 
-def scale_plane_acc_to_mask(mask, mesh, plane):
-    m = cv2.imread(mask, cv2.IMREAD_GRAYSCALE)
-    rows, cols = np.where(m > 0)
-    xmin, ymin = np.min(cols), np.min(rows)
-    xmax, ymax = np.max(cols), np.max(rows)
-    bbx_ht = ymax - ymin
+# def scale_plane_acc_to_mask(mask, mesh, plane):
+#     m = cv2.imread(mask, cv2.IMREAD_GRAYSCALE)
+#     rows, cols = np.where(m > 0)
+#     xmin, ymin = np.min(cols), np.min(rows)
+#     xmax, ymax = np.max(cols), np.max(rows)
+#     bbx_ht = ymax - ymin
 
-    mesh_height, mesh_width = get_world_height(mesh)
-    plane_height, plane_width = get_world_height(plane)
+#     mesh_height, mesh_width = get_world_height(mesh)
+#     plane_height, plane_width = get_world_height(plane)
 
-    plane_rwh = (mesh_height / bbx_ht) * 1080
-    # toggle_mode_to('OBJECT')
-    bpy.data.objects['Plane'].scale[1] = plane_rwh
-    bpy.data.objects['Plane'].scale[0] = plane_rwh * (plane_width / plane_height)
+#     plane_rwh = (mesh_height / bbx_ht) * 1080
+#     # toggle_mode_to('OBJECT')
+#     bpy.data.objects['Plane'].scale[1] = plane_rwh
+#     bpy.data.objects['Plane'].scale[0] = plane_rwh * (plane_width / plane_height)
 
 def get_beta_param(obj, gender, path):
     bpy.ops.object.mode_set(mode='OBJECT')
