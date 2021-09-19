@@ -72,7 +72,7 @@ def add_plane(size, scale):
     bpy.context.view_layer.update()
     width = bpy.data.objects['Plane'].dimensions.x
     height = bpy.data.objects['Plane'].dimensions.y
-    # bpy.context.object.location[2] = height/2
+    bpy.context.object.location[2] = height/2
 
 def apply_pose_and_beta(obj,  body_pose, transl, beta):
     if obj.type == 'MESH':
