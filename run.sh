@@ -37,7 +37,6 @@ if [ "$RESTART" == "resume" ]; then
 elif [ "$RESTART" == "restart" ]; then
     echo "All saved progress will be removed"
     fresh_start
-else; then
+else
     fresh_start
-    if
 fi

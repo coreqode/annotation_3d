@@ -65,14 +65,14 @@ def set_pose_from_rodrigues(armature, bone_name, rodrigues, rodrigues_reference=
         """
 
 def add_plane(size, scale):
-    bpy.ops.mesh.primitive_plane_add(size=size, enter_editmode=False, align='WORLD', location = (0, 0, 0), rotation=(1.5707963267949, 0, 0), )
+    bpy.ops.mesh.primitive_plane_add(size=size, enter_editmode=False, align='WORLD', location = (0, 1, 0), rotation=(1.5707963267949, 0, 0), )
     bpy.context.object.scale[0] = scale[0]
     bpy.context.object.scale[1] = scale[1]
     bpy.context.object.scale[2] = scale[2]
     bpy.context.view_layer.update()
     width = bpy.data.objects['Plane'].dimensions.x
     height = bpy.data.objects['Plane'].dimensions.y
-    bpy.context.object.location[2] = height/2
+    # bpy.context.object.location[2] = height/2
 
 def apply_pose_and_beta(obj,  body_pose, transl, beta):
     if obj.type == 'MESH':
